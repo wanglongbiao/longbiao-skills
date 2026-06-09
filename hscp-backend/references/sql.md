@@ -1,6 +1,7 @@
 # SQL 脚本规范
 
-HSCP 数据库以 **PostgreSQL / 人大金仓 KingbaseES** 为主（两者语法高度兼容）。除非明确说明环境是 MySQL，**一律按 PostgreSQL/金仓写法**。
+- 默认的数据库是 MySQL。
+- 渤海石油（hscp-bhsy-v2） 的数据库 是PostgreSQL 。
 
 ## 三套数据库对象
 
@@ -47,7 +48,7 @@ WHERE a.area_type = 1001
 
 ## 文件命名与存放
 
-脚本放在 `doc/sql-cnooc/` 下，按 sprint 或年份/日期分目录（如 `doc/sql-cnooc/2025/`）。
+脚本放在 `doc/sql/` 下，按年份/日期分目录（如 `doc/sql-cnooc/2025/`）。
 
 文件名格式：**`日期_库名_类型.sql`**
 
