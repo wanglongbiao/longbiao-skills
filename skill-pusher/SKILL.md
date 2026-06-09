@@ -1,45 +1,37 @@
 ---
 name: skill-pusher
-description: "将本地技能推送到 GitHub 技能仓库。当用户说'推送技能'或'推送到技能仓库'时使用。需要指定技能名称和内容，或者用户提供已创建好的技能路径。"
+description: "将本地技能同步到 GitHub 技能仓库。当用户说'同步技能'、'推送技能'、'推送到技能仓库'或新增/更新本地技能后需要上传时使用。把 ~/.claude/skills 下的全部本地技能整体同步到 git@github.com:wanglongbiao/longbiao-skills.git。"
 ---
 
-# 技能推送 skill
+# 技能同步 skill
 
-将本地创建的技能推送到 https://github.com/wanglongbiao/longbiao-skills
+把本地 `~/.claude/skills/` 下的全部技能（每个技能的整个目录）同步到远程仓库
+`git@github.com:wanglongbiao/longbiao-skills.git`（分支 `main`）。
 
-## 推送流程
+新增、更新、删除都会被正确同步——以本地为准，远程是本地的镜像。
 
-### 方式一：指定技能名称和SKILL.md路径
+## 同步脚本
+
+直接运行下面这个脚本（Bash 工具，git-bash 环境）。它会自动 clone → 镜像 → 提交 → 推送。
+
 ```bash
-# 克隆仓库（如果需要）
-git clone https://github.com/wanglongbiai/longbiao-skills --depth 1
-
-# 或如果已经克隆
-cd longbiao-skills
-
-# 创建技能目录（技能名作为目录名）
-mkdir -p <skill-name>
-
-# 复制 SKILL.md
-cp /path/to/SKILL.md <skill-name>/
-
-# 提交推送
-git add <skill-name>/
-git commit -m "Add <skill-name> skill"
-git push origin main
+bash ~/.claude/skills/skill-pusher/sync.sh
 ```
 
-### 方式二：用户提供已有技能路径
-直接复制整个目录到 longbiao-skills 目录下
+脚本无改动时不会产生提交，会输出"没有变更，无需推送"。
+
+## 工作原理
+
+1. clone 远程仓库到临时目录 `/tmp/longbiao-skills-sync`
+2. 删除仓库里旧的技能目录（保留 `.git`、`README` 等）
+3. 用 `~/.claude/skills/` 下的本地技能整体覆盖进去
+4. `git add -A` → 若有变更则 commit + push
 
 ## 注意事项
 
-- 技能名称使用 kebab-case（小写+连字符）
-- 只推送 SKILL.md 文件，不推送其他文件
-- 先确认 longbiao-skills 目录在正确位置
-- 如果仓库已有该技能，会被覆盖
-
-## 示例
-
-用户说"推送 my-new-skill，文件在 C:\Users\xxx\my-new-skill\SKILL.md"
-→ 执行：克隆仓库 → 创建目录 → 复制文件 → 提交推送
+- 同步范围是 `~/.claude/skills/` 下的目录——这些是用户手动创建的本地技能。
+  插件提供的技能（如 deep-research、claude-hud 等）不在此目录，不会被同步。
+- 远程地址用 SSH（`git@github.com:...`），已确认认证可用。
+- 这是**单向镜像**：本地有什么，远程就是什么。本地删掉的技能，推送后远程也会删除。
+- 如果只想推送单个技能，告诉脚本不方便，直接手动操作：
+  `cd /tmp/longbiao-skills-sync && cp -r ~/.claude/skills/<name> . && git add <name> && git commit -m "..." && git push`
